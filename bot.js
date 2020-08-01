@@ -16,12 +16,18 @@ const prefix = process.env.prefix;
 const ownerID = process.env.ownerID;
 const classRemindChannel = process.env.classRemindChannel;
 
+// mySQL
+const seikiDB = require('./config/DBConnection');
+const calendarEvent = require('./models/calendarEvent');
+
 bot.login(TOKEN);
 
 // Bot on Ready
 bot.on('ready', () => {
 	console.info(`Logged in as ${bot.user.tag}!`);
-	bot.user.setActivity("your every move", { type: "WATCHING" });
+    bot.user.setActivity("your every move", { type: "WATCHING" });
+    // Connects to MySQL database
+    seikiDB.setUpDB(false); // To set up database with new tables set(True)
 });
 
 // Bot on Message
