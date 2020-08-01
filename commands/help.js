@@ -2,18 +2,19 @@ module.exports = {
     name: 'help',
     description: 'Show all commands',
     execute(msg, args) {
-        if (args[0] == "create") {
+        var arg = args.trim()
+        if (arg == "create") {
             msg.channel.send({embed: {
                 color: 0x0080ff,
                 title: "Help",
                 description: "Create a reminder for your event",
                 fields: [{
                     name: "Usage:",
-                    value: "`-create <event name> <eventDate> <eventTime>`",
+                    value: "`-create <event name>, <eventDate>, <eventTime>`",
                     },
                     {
                     name: "Example:",
-                    value: "`-create Example event name 2020-09-23 14:00`",
+                    value: "`-create Example event name, 2020-09-23, 14:00`",
                     }
                 ],
                 timestamp: new Date(),
@@ -22,7 +23,7 @@ module.exports = {
                     text: "© Example",
                 }            
             }});
-        } else if (args[0] == "listevent") {
+        } else if (arg == "listevent") {
             msg.channel.send({embed: {
                 color: 0x0080ff,
                 title: "Help",
@@ -38,7 +39,7 @@ module.exports = {
                     text: "© Example",
                 }            
             }});
-        } else if (args[0] == "choose") {
+        } else if (arg == "choose") {
             msg.channel.send({embed: {
                 color: 0x0080ff,
                 title: "Help",
@@ -55,7 +56,6 @@ module.exports = {
                 }            
             }});
         } else {
-            // msg.channel.send("m - minutes, s - seconds, d - days.\n\t{@User}");
             msg.channel.send({embed: {
                 color: 0x0080ff,
                 // author: {
