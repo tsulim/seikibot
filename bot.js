@@ -98,6 +98,10 @@ function SendReminder(eventName, eventDate, eventStart, channelID, MinutesToEven
     });
 }
 
+setInterval(function() {
+    CheckEvents();
+}, 59000);
+
 bot.login(TOKEN);
 
 // Bot on Ready
