@@ -160,9 +160,17 @@ bot.on('message', msg => {
     // Message does not start with command prefix, return
 	if (!msg.content.startsWith(prefix)) return;
 
-    // splits msg content into an Array called args
-	const args = msg.content.slice(prefix.length).split(/ +/);
-	const commandName = args.shift().toLowerCase();     // Command name is pushed into a variable
+    // split msg content into 2 parts, command & others
+    const spacePos = msg.content.indexOf(' ');
+    if (spacePos != -1) {
+        var args = msg.content.slice(spacePos);
+        var commandName = msg.content.slice(1, spacePos);    // Command name is pushed into a variable
+    } else {
+        var commandName = msg.content.slice(prefix.length);
+        var args = "";
+    }
+    console.log(args)
+    console.log(spacePos)
 	console.info(`Called command: ${commandName}`);     // print commandname
 
 	// if (!bot.commands.has(commandName)) return;
@@ -171,11 +179,20 @@ bot.on('message', msg => {
 		var eventArr = new Array();
 
         //Splitting message to get individual variables
-        eventArr = msg.content.substring(8).split(", ");
-    
-        var name = args.slice(0,(args.length-2)).join(" ");
-        var date = moment(args[args.length-2]).format('YYYY-MM-DD');
-        var start = args[args.length-1];
+        eventArr = args.split(", ");
+        var name = eventArr[0];
+        try {
+            var date = moment(eventArr[1]).format('YYYY-MM-DD');
+        } catch (error) {
+            console.error(error);
+			msg.reply('make sure your date format is `YYYY-MM-DD`!');
+        }
+        try {
+            var start = eventArr[2];
+        } catch (error) {
+            console.error(error);
+			msg.reply("make sure your time format is `HH:mm` and it's according to 24 hour format!");
+        }
         var channelid = msg.channel.id;
         var serverid = msg.guild.id;
 
@@ -184,10 +201,10 @@ bot.on('message', msg => {
 
         } else {
             var today = new Date();
-            dateArray = date.split('-');
+            var dateArray = date.split('-');
             var currentTime = moment().format('HH:mm').split(':');
             var currentTimeMinutes = (60 * parseInt(currentTime[0])) + parseInt(currentTime[1]);
-            eventStartMinutesArr = start.split(':');
+            var eventStartMinutesArr = start.split(':');
             var eventStartMinutes = (60 * parseInt(eventStartMinutesArr[0])) + parseInt(eventStartMinutesArr[1]);
 
             if (parseInt(dateArray[0]) < today.getFullYear()){
@@ -269,23 +286,6 @@ bot.on('message', msg => {
             console.log(err)
             msg.channel.send('There are no events in this server!')
         })
-    } else if (commandName == "choose") {
-        var choices = []
-        var choice = []
-        args.forEach(arg => {
-            if (arg == "|") {
-                choicestring = choice.join(' ')
-                console.log(choicestring)
-                choices.push(choicestring);
-                choice = []
-            } else {
-                choice.push(arg)
-                console.log(choice)
-            }
-        })
-        console.log(choices)
-        var result = choices[Math.floor(Math.random() * choices.length)];
-        msg.channel.send("<:PikaThink:682148895945785345> | <@" + msg.author.id + ">, I choose " + result)
     } else {
 		try {
 			bot.commands.get(commandName).execute(msg, args);
