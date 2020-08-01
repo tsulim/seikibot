@@ -20,6 +20,84 @@ const classRemindChannel = process.env.classRemindChannel;
 const seikiDB = require('./config/DBConnection');
 const calendarEvent = require('./models/calendarEvent');
 
+// Check calendarEvents
+function CheckEvents(){
+    console.log("Checking Reminders...");
+    var currentDate = moment().format('YYYY-MM-DD')
+    var currentTime = moment().format('HH:mm').split(':')
+    var currentTimeMinutes = (60 * parseInt(currentTime[0])) + parseInt(currentTime[1]);
+
+    var infoArray = [];
+
+    calendarEvent.findAll({
+        where: {
+            eventDate: currentDate,
+            status: "ongoing",
+        }
+    }).then((events) => {
+        events.forEach(event => {
+            infoArray[0] = event.eventName;
+            infoArray[1] = event.eventDate;
+            infoArray[2] = event.eventStart;
+            infoArray[3] = event.channelID;
+            infoArray[4] = event.serverID;
+
+            eventStartMinutesArr = [];
+            eventStartMinutesArr = infoArray[2].split(':');
+            var eventStartMinutes = (60 * parseInt(eventStartMinutesArr[0])) + parseInt(eventStartMinutesArr[1]);
+            console.log(eventStartMinutes)
+            if ( (((eventStartMinutes - 720) == currentTimeMinutes) ||
+                    ((eventStartMinutes - 60) == currentTimeMinutes) ||
+                    ((eventStartMinutes - 30) == currentTimeMinutes) ||
+                    ((eventStartMinutes - 10) == currentTimeMinutes)) &&
+                currentDate == infoArray[1]) {
+    
+                console.log("reminder sent");
+                SendReminder(infoArray[0], infoArray[1], infoArray[2], infoArray[3], (eventStartMinutes - currentTimeMinutes));
+            } else if ((eventStartMinutes == currentTimeMinutes) &&
+            currentDate == infoArray[1]) {
+                calendarEvent.update({
+                    eventName: infoArray[0],
+                    eventDate: infoArray[1],
+                    eventStart: infoArray[2],
+                    channelID: infoArray[3],
+                    serverID: infoArray[4],
+                    status: "completed",
+                });
+                console.log("reminder sent");
+                SendReminder(infoArray[0], infoArray[1], infoArray[2], infoArray[3], (eventStartMinutes - currentTimeMinutes));
+            }
+        });
+    })
+}
+
+function SendReminder(eventName, eventDate, eventStart, channelID, MinutesToEvent){
+    channel = bot.channels.find(channel => channel.id === channelID)
+    channel.send({
+        embed: {
+            color: 342145,
+            author: {
+                name: "Reminder: " + eventName + " in : "+ MinutesToEvent +" minutes!",
+            },
+            title: eventName,
+            fields: [{
+                name: "Date",
+                value: eventDate
+                },
+                {
+                name: "Time",
+                value: eventStart
+                },
+            ],
+            timestamp: new Date(),
+            footer: {
+                icon_url: bot.avatarURL,
+
+            }
+        },
+    });
+}
+
 bot.login(TOKEN);
 
 // Bot on Ready
